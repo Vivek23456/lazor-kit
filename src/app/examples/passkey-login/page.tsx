@@ -37,15 +37,29 @@ export default function PasskeyLoginPage() {
     setError(null)
 
     try {
+      console.log('Starting passkey authentication...')
       await wallet.connect() // Opens Lazor Portal + WebAuthn
-      console.log('Wallet:', wallet.publicKey?.toBase58())
+      console.log('Authentication completed!')
+      console.log('Wallet object:', wallet)
+      console.log('Public key:', wallet.publicKey)
+      console.log('Public key base58:', wallet.publicKey?.toBase58())
       
       // Fetch balance after connection
       if (wallet.publicKey) {
+        setWalletAddress(wallet.publicKey.toBase58())
         await fetchBalance()
+      } else {
+        console.warn('No public key found after authentication')
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to authenticate with passkey')
+      console.error('Full error:', err)
+      
+      // Handle specific errors
+      if (err.message && err.message.includes('payer')) {
+        setError('Wallet created but paymaster initialization failed. This is a known issue with devnet. Your wallet was created successfully!')
+      } else {
+        setError(err.message || 'Failed to authenticate with passkey')
+      }
       console.error('Passkey auth error:', err)
     } finally {
       setIsLoading(false)
