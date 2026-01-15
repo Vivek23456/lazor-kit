@@ -1,31 +1,40 @@
-'use client'
+"use client";
 
-import { LazorkitProvider as LazorkitProviderSDK, useWallet } from '@lazorkit/monorepo/react'
-import { ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from "react";
+import { LazorkitClient } from "@lazorkit/monorepo/packages/ts-sdk";
 
-/**
- * Lazorkit Provider Wrapper
- * 
- * This wraps the Lazorkit SDK provider with the required configuration.
- * The SDK handles:
- * - Passkey authentication via Lazor Portal
- * - MPC smart wallet creation
- * - Gasless transactions via paymaster
- * - Session persistence across devices
- */
-export function LazorkitProvider({ children }: { children: ReactNode }) {
+const LazorkitContext = createContext<any>(null);
+
+export function LazorkitProvider({ children }: { children: React.ReactNode }) {
+  const [client, setClient] = useState<LazorkitClient | null>(null);
+
+  useEffect(() => {
+    const lazor = new LazorkitClient({
+      rpcUrl: process.env.NEXT_PUBLIC_SOLANA_RPC_URL!,
+      portalUrl: process.env.NEXT_PUBLIC_LAZORKIT_PORTAL_URL!,
+      paymasterUrl: process.env.NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL!,
+    });
+
+    setClient(lazor);
+  }, []);
+
   return (
-    <LazorkitProviderSDK
-      rpcUrl={process.env.NEXT_PUBLIC_SOLANA_RPC_URL!}
-      portalUrl={process.env.NEXT_PUBLIC_LAZORKIT_PORTAL_URL}
-      paymasterConfig={{
-        paymasterUrl: process.env.NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL!
-      }}
-    >
+    <LazorkitContext.Provider value={client}>
       {children}
-    </LazorkitProviderSDK>
-  )
+    </LazorkitContext.Provider>
+  );
 }
 
-// Export useWallet hook for components
-export { useWallet }
+export function useWallet() {
+  const lazor = useContext(LazorkitContext);
+  if (!lazor) throw new Error("Lazorkit not ready");
+
+  return {
+    connect: async () => {
+      await lazor.connect(); // passkey
+      return lazor.wallet;
+    },
+    publicKey: lazor.wallet?.publicKey,
+    sendTransaction: lazor.sendTransaction.bind(lazor),
+  };
+}
