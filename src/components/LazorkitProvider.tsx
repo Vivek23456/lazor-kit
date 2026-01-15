@@ -21,15 +21,13 @@ interface LazorkitContextType {
 const LazorkitContext = createContext<LazorkitContextType | null>(null)
 
 export function LazorkitProvider({ children }: { children: ReactNode }) {
-  // Initialize Lazorkit with your API key
-  const apiKey = process.env.NEXT_PUBLIC_LAZORKIT_API_KEY || ''
+  // Initialize Lazorkit - API key is not needed
   const network = (process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'devnet') as 'devnet' | 'mainnet'
   
   // Initialize Lazorkit SDK
   // Note: Actual implementation depends on @lazor-kit/react API
   // This is a template structure
   const lazorkit = useLazorkit({
-    apiKey,
     network,
   })
 

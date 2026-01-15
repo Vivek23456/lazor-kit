@@ -115,7 +115,7 @@ If version is too old, update Node.js from [nodejs.org](https://nodejs.org/)
 Once dependencies are installed:
 
 1. Create `.env.local` file (see ENV_SETUP.md)
-2. Add your Lazorkit API key
+2. Configure network (devnet/mainnet) - no API key needed!
 3. Run `npm run dev` or `yarn dev`
 4. Open http://localhost:3000
 

@@ -15,8 +15,9 @@ This project provides practical, production-ready examples of:
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn
-- Lazorkit API key ([Get one here](https://docs.lazorkit.com/))
 - Modern browser with WebAuthn support (Chrome, Firefox, Safari, Edge)
+
+**Note:** Lazorkit does not require an API key - you can start using it immediately!
 
 ### Installation
 
@@ -41,10 +42,11 @@ yarn install
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_LAZORKIT_API_KEY=your_api_key_here
 NEXT_PUBLIC_SOLANA_NETWORK=devnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 ```
+
+**Note:** Lazorkit does not require an API key - you can start using it immediately!
 
 4. **Run the development server**
 
@@ -205,14 +207,15 @@ export function MyComponent() {
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_LAZORKIT_API_KEY` | Your Lazorkit API key | `lzk_xxxxx` |
 | `NEXT_PUBLIC_SOLANA_NETWORK` | Solana network | `devnet` or `mainnet` |
 | `NEXT_PUBLIC_SOLANA_RPC_URL` | Custom RPC endpoint (optional) | `https://api.devnet.solana.com` |
+
+**Note:** Lazorkit does not require an API key - you can start using it immediately without any authentication setup!
 
 ### Network Configuration
 
 - **Devnet**: Use for testing and development
-- **Mainnet**: Use for production (requires mainnet API key)
+- **Mainnet**: Use for production
 
 ## 🚢 Deployment
 
@@ -234,8 +237,9 @@ This is a standard Next.js application and can be deployed to:
 ### Important Notes for Deployment
 
 - **HTTPS Required**: Passkey API requires HTTPS in production
-- **Environment Variables**: Ensure all env vars are set in your hosting platform
+- **Environment Variables**: Ensure network env var is set in your hosting platform
 - **Network**: Use `devnet` for testing, `mainnet` for production
+- **No API Key Needed**: Lazorkit works without an API key
 
 ## 🧪 Testing
 
@@ -285,7 +289,7 @@ This is an example repository. Feel free to:
 
 ## ⚠️ Important Notes
 
-- **API Keys**: Never commit API keys to version control
+- **No API Key Required**: Lazorkit works without an API key - start using it immediately!
 - **HTTPS**: Required for passkey authentication in production
 - **Network**: Always test on devnet before mainnet
 - **Errors**: Handle errors gracefully - passkey may not be available on all devices
@@ -295,7 +299,7 @@ This is an example repository. Feel free to:
 ### Passkey not working?
 - Ensure HTTPS is enabled
 - Check browser compatibility
-- Verify API key is correct
+- Verify network configuration is correct
 
 ### Transactions failing?
 - Check network configuration

@@ -18,9 +18,10 @@ This guide will help you deploy the Lazorkit example to various platforms.
    - **Framework Preset**: Next.js
    - **Root Directory**: `./` (or leave default)
 5. Add Environment Variables:
-   - `NEXT_PUBLIC_LAZORKIT_API_KEY` - Your Lazorkit API key
    - `NEXT_PUBLIC_SOLANA_NETWORK` - `devnet` or `mainnet`
    - `NEXT_PUBLIC_SOLANA_RPC_URL` - Optional custom RPC
+   
+   **Note:** Lazorkit does not require an API key - you can deploy without one!
 6. Click "Deploy"
 
 ### Step 3: Verify Deployment
@@ -41,9 +42,8 @@ In Netlify dashboard, configure:
 ### Step 2: Environment Variables
 
 Add the same environment variables as Vercel:
-- `NEXT_PUBLIC_LAZORKIT_API_KEY`
 - `NEXT_PUBLIC_SOLANA_NETWORK`
-- `NEXT_PUBLIC_SOLANA_RPC_URL`
+- `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
 
 ### Step 3: Deploy
 
@@ -68,9 +68,8 @@ Amplify will auto-detect Next.js. Verify:
 ### Step 3: Environment Variables
 
 Add in Amplify Console → App settings → Environment variables:
-- `NEXT_PUBLIC_LAZORKIT_API_KEY`
 - `NEXT_PUBLIC_SOLANA_NETWORK`
-- `NEXT_PUBLIC_SOLANA_RPC_URL`
+- `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
 
 ## 🐳 Deploy with Docker
 
@@ -124,15 +123,12 @@ const nextConfig: NextConfig = {
 ```bash
 docker build -t lazorkit-example .
 docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_LAZORKIT_API_KEY=your_key \
   -e NEXT_PUBLIC_SOLANA_NETWORK=devnet \
   lazorkit-example
 ```
 
 ## 📋 Pre-Deployment Checklist
 
-- [ ] All environment variables are set
-- [ ] API keys are valid and have correct permissions
 - [ ] Network is set correctly (devnet/mainnet)
 - [ ] HTTPS is enabled (required for passkey)
 - [ ] All examples are tested locally
@@ -141,7 +137,7 @@ docker run -p 3000:3000 \
 
 ## 🔒 Security Considerations
 
-1. **Never commit API keys** - Use environment variables
+1. **Environment Variables** - Only set network configuration (no API key needed)
 2. **Use HTTPS** - Required for WebAuthn/passkey
 3. **Validate inputs** - Always validate user inputs
 4. **Rate limiting** - Consider implementing rate limits
@@ -171,7 +167,7 @@ NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 ### Passkey Not Working
 - Ensure HTTPS is enabled
 - Check browser console for errors
-- Verify API key is correct
+- Verify network configuration is correct
 
 ### Environment Variables Not Working
 - Restart deployment after adding env vars

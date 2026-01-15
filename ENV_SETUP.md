@@ -7,10 +7,6 @@ This guide explains how to set up environment variables for the Lazorkit example
 Create a `.env.local` file in the root directory of the project with the following variables:
 
 ```env
-# Lazorkit API Key (Required)
-# Get your API key from https://docs.lazorkit.com/
-NEXT_PUBLIC_LAZORKIT_API_KEY=your_api_key_here
-
 # Solana Network (Required)
 # Options: 'devnet' or 'mainnet'
 # Use 'devnet' for testing, 'mainnet' for production
@@ -22,13 +18,7 @@ NEXT_PUBLIC_SOLANA_NETWORK=devnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 ```
 
-## 🔑 Getting Your Lazorkit API Key
-
-1. Visit [Lazorkit Documentation](https://docs.lazorkit.com/)
-2. Sign up or log in to your account
-3. Navigate to API Keys section
-4. Create a new API key
-5. Copy the key and paste it in `.env.local`
+**Note:** Lazorkit does not require an API key. You can start using it immediately without any authentication setup.
 
 ## 🌐 Network Configuration
 
@@ -114,9 +104,8 @@ When deploying to production:
 
 1. Go to Project Settings → Environment Variables
 2. Add each variable:
-   - `NEXT_PUBLIC_LAZORKIT_API_KEY`
    - `NEXT_PUBLIC_SOLANA_NETWORK`
-   - `NEXT_PUBLIC_SOLANA_RPC_URL`
+   - `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
 3. Redeploy the project
 
 ## 🔍 Verifying Environment Variables
@@ -138,9 +127,8 @@ console.log('RPC:', process.env.NEXT_PUBLIC_SOLANA_RPC_URL)
 - Clear `.next` cache and rebuild
 
 ### API key errors?
-- Verify key is correct and active
-- Check key has proper permissions
-- Ensure key is for correct network (devnet/mainnet)
+- Lazorkit does not require an API key, so you shouldn't see any API key errors
+- If you see errors, check the Lazorkit documentation for the latest setup requirements
 
 ### Network errors?
 - Verify RPC URL is accessible

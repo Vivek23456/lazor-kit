@@ -118,14 +118,10 @@ lazorkit-example/
 
 ### Next Steps for Submission
 
-1. **Get Lazorkit API Key**
-   - Visit https://docs.lazorkit.com/
-   - Sign up and get API key
-
-2. **Set Up Environment**
-   - Copy `.env.example` to `.env.local`
-   - Add your API key
+1. **Set Up Environment**
+   - Create `.env.local` file
    - Configure network (devnet/mainnet)
+   - **Note:** Lazorkit does not require an API key - you can start using it immediately!
 
 3. **Install Dependencies**
    ```bash

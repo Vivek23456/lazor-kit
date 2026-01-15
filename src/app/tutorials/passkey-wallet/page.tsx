@@ -19,10 +19,11 @@ export default function PasskeyWalletTutorial() {
           <h2>Prerequisites</h2>
           <ul>
             <li>Next.js project set up with Lazorkit SDK installed</li>
-            <li>Lazorkit API key (get from <a href="https://docs.lazorkit.com/">docs.lazorkit.com</a>)</li>
             <li>Modern browser with WebAuthn support (Chrome, Firefox, Safari, Edge)</li>
             <li>HTTPS connection (required for passkey API)</li>
           </ul>
+          
+          <p><strong>Note:</strong> Lazorkit does not require an API key - you can start using it immediately!</p>
         </section>
 
         <section>
@@ -36,9 +37,9 @@ export default function PasskeyWalletTutorial() {
           <h2>Step 2: Set Up Environment Variables</h2>
           <p>Create a <code>.env.local</code> file in your project root:</p>
           <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded">
-{`NEXT_PUBLIC_LAZORKIT_API_KEY=your_api_key_here
-NEXT_PUBLIC_SOLANA_NETWORK=devnet`}
+{`NEXT_PUBLIC_SOLANA_NETWORK=devnet`}
           </pre>
+          <p><strong>Note:</strong> Lazorkit does not require an API key - you can start using it immediately!</p>
         </section>
 
         <section>
@@ -50,11 +51,9 @@ NEXT_PUBLIC_SOLANA_NETWORK=devnet`}
 import { useLazorkit } from '@lazor-kit/react'
 
 export function LazorkitProvider({ children }) {
-  const apiKey = process.env.NEXT_PUBLIC_LAZORKIT_API_KEY
   const network = process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'devnet'
   
   const lazorkit = useLazorkit({
-    apiKey,
     network,
   })
 
