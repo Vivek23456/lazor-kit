@@ -34,6 +34,8 @@ npm install
 yarn install
 ```
 
+**Note:** If the Lazorkit SDK package (`@lazor-kit/react`) is not available on npm, you may need to install it from GitHub or use a local package. See [INSTALLATION.md](./INSTALLATION.md) for detailed instructions.
+
 3. **Set up environment variables**
 
 Create a `.env.local` file in the root directory:
@@ -148,9 +150,18 @@ This tutorial explains:
 
 ### Install Lazorkit SDK
 
+**Important:** The Lazorkit SDK package may need to be installed separately. Try:
+
 ```bash
 npm install @lazor-kit/react @solana/web3.js
 ```
+
+If the package is not found on npm, install from GitHub:
+```bash
+npm install git+https://github.com/lazor-kit/lazor-kit.git @solana/web3.js
+```
+
+For more installation options, see [INSTALLATION.md](./INSTALLATION.md).
 
 ### Configure Lazorkit Provider
 
