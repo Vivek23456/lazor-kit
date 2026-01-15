@@ -35,15 +35,14 @@ npm install
 yarn install
 ```
 
-**Note:** If the Lazorkit SDK package (`@lazor-kit/react`) is not available on npm, you may need to install it from GitHub or use a local package. See [INSTALLATION.md](./INSTALLATION.md) for detailed instructions.
-
 3. **Set up environment variables**
 
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com
 ```
 
 **Note:** Lazorkit does not require an API key - you can start using it immediately!
@@ -89,28 +88,30 @@ lazorkit-example/
 ### 1. Passkey Login (`/examples/passkey-login`)
 
 Demonstrates how to:
-- Create a new passkey-based wallet
-- Authenticate using passkey (biometrics/device PIN)
-- Retrieve wallet address and balance
-- Handle authentication errors
+- Create a new passkey-based wallet using `wallet.connect()`
+- Authenticate using passkey (opens Lazor Portal + WebAuthn)
+- Retrieve wallet address using `wallet.publicKey.toBase58()`
+- Fetch and display wallet balance
 
 **Key Features:**
 - No seed phrases required
-- Browser-native authentication
+- Opens Lazor Portal for authentication
+- MPC smart wallet creation
 - Cross-device session persistence
 
 ### 2. Gasless Transaction (`/examples/gasless-transaction`)
 
 Demonstrates how to:
-- Send USDC tokens without paying gas fees
-- Execute transactions using smart wallet
+- Send SOL tokens without paying gas fees
+- Execute transactions using `wallet.sendTransaction()`
+- Paymaster automatically sponsors fees
 - Handle transaction confirmations
 - Display transaction signatures
 
 **Key Features:**
 - Zero gas fees for users
-- Smart wallet sponsorship
-- Support for USDC and other SPL tokens
+- Paymaster sponsorship (configured in provider)
+- Support for SOL and SPL tokens
 
 ### 3. Token Swap (`/examples/token-swap`)
 
@@ -152,15 +153,8 @@ This tutorial explains:
 
 ### Install Lazorkit SDK
 
-**Important:** The Lazorkit SDK package may need to be installed separately. Try:
-
 ```bash
-npm install @lazor-kit/react @solana/web3.js
-```
-
-If the package is not found on npm, install from GitHub:
-```bash
-npm install git+https://github.com/lazor-kit/lazor-kit.git @solana/web3.js
+npm install @lazorkit/wallet @solana/web3.js
 ```
 
 For more installation options, see [INSTALLATION.md](./INSTALLATION.md).
@@ -170,17 +164,19 @@ For more installation options, see [INSTALLATION.md](./INSTALLATION.md).
 Wrap your app with `LazorkitProvider` in your root layout:
 
 ```tsx
-import { LazorkitProvider } from '@/components/LazorkitProvider'
+import { LazorkitProvider } from "@lazorkit/wallet"
 
 export default function RootLayout({ children }) {
   return (
-    <html>
-      <body>
-        <LazorkitProvider>
-          {children}
-        </LazorkitProvider>
-      </body>
-    </html>
+    <LazorkitProvider
+      rpcUrl={process.env.NEXT_PUBLIC_SOLANA_RPC_URL!}
+      portalUrl={process.env.NEXT_PUBLIC_LAZORKIT_PORTAL_URL}
+      paymasterConfig={{
+        paymasterUrl: process.env.NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL!
+      }}
+    >
+      {children}
+    </LazorkitProvider>
   )
 }
 ```
@@ -190,14 +186,17 @@ export default function RootLayout({ children }) {
 ```tsx
 'use client'
 
-import { useLazorkitContext } from '@/components/LazorkitProvider'
+import { useWallet } from "@lazorkit/wallet"
 
 export function MyComponent() {
-  const lazorkit = useLazorkitContext()
+  const wallet = useWallet()
   
-  // Use Lazorkit methods
-  const wallet = await lazorkit.getWallet()
-  // ...
+  async function login() {
+    await wallet.connect() // Opens Lazor Portal + WebAuthn
+    console.log("Wallet:", wallet.publicKey.toBase58())
+  }
+  
+  return <button onClick={login}>Login with Passkey</button>
 }
 ```
 
@@ -207,8 +206,9 @@ export function MyComponent() {
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_SOLANA_NETWORK` | Solana network | `devnet` or `mainnet` |
-| `NEXT_PUBLIC_SOLANA_RPC_URL` | Custom RPC endpoint (optional) | `https://api.devnet.solana.com` |
+| `NEXT_PUBLIC_SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
+| `NEXT_PUBLIC_LAZORKIT_PORTAL_URL` | Lazorkit Portal URL | `https://portal.lazor.sh` |
+| `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL` | Lazorkit Paymaster URL | `https://kora.devnet.lazorkit.com` |
 
 **Note:** Lazorkit does not require an API key - you can start using it immediately without any authentication setup!
 
@@ -245,8 +245,8 @@ This is a standard Next.js application and can be deployed to:
 
 ### Test on Devnet
 
-1. Set `NEXT_PUBLIC_SOLANA_NETWORK=devnet` in `.env.local`
-2. Get devnet USDC from faucets if needed
+1. Set environment variables for devnet in `.env.local`
+2. Get devnet SOL from faucets if needed
 3. Test all examples on devnet before mainnet
 
 ### Test Passkey Authentication
@@ -291,7 +291,7 @@ This is an example repository. Feel free to:
 
 - **No API Key Required**: Lazorkit works without an API key - start using it immediately!
 - **HTTPS**: Required for passkey authentication in production
-- **Network**: Always test on devnet before mainnet
+- **Environment Variables**: Ensure all required env vars are set
 - **Errors**: Handle errors gracefully - passkey may not be available on all devices
 
 ## 🐛 Troubleshooting

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useLazorkitContext } from '@/components/LazorkitProvider'
+import { useWallet } from '@/components/LazorkitProvider'
 import Link from 'next/link'
 
 /**
@@ -11,6 +11,9 @@ import Link from 'next/link'
  * 1. Swap tokens on Solana using passkey-authenticated wallet
  * 2. Integrate with DEX (e.g., Jupiter, Raydium)
  * 3. Execute swap transactions with smart wallet
+ * 
+ * Note: This is a template showing the integration pattern.
+ * Full implementation requires Jupiter API integration.
  */
 export default function TokenSwapPage() {
   const [fromToken, setFromToken] = useState('SOL')
@@ -20,9 +23,14 @@ export default function TokenSwapPage() {
   const [txSignature, setTxSignature] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const lazorkit = useLazorkitContext()
+  const wallet = useWallet()
 
   const handleSwap = async () => {
+    if (!wallet.publicKey) {
+      setError('Please connect your wallet first')
+      return
+    }
+
     if (!amount) {
       setError('Please enter amount to swap')
       return
@@ -41,15 +49,11 @@ export default function TokenSwapPage() {
       // })
 
       // Step 2: Execute swap using Lazorkit smart wallet
-      // const signature = await lazorkit.executeSwap({
-      //   quote,
-      //   userWallet: await lazorkit.getWallet(),
-      // })
-
-      // setTxSignature(signature)
+      // const swapTransaction = await buildJupiterSwapTransaction(quote, wallet.publicKey)
+      // const signature = await wallet.sendTransaction(swapTransaction, connection)
       
       console.log('Executing token swap...')
-      setError('Please implement actual swap integration with Jupiter/Raydium')
+      setError('Token swap integration requires Jupiter API. See tutorial for implementation details.')
     } catch (err: any) {
       setError(err.message || 'Failed to execute swap')
       console.error('Swap error:', err)
@@ -71,6 +75,14 @@ export default function TokenSwapPage() {
         </p>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+          {!wallet.publicKey && (
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+              <p className="text-yellow-800 dark:text-yellow-200">
+                Please connect your wallet first using the passkey login example.
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
               <p className="text-red-800 dark:text-red-200">{error}</p>
@@ -148,7 +160,7 @@ export default function TokenSwapPage() {
               </div>
               <button
                 onClick={handleSwap}
-                disabled={isLoading || !amount}
+                disabled={isLoading || !amount || !wallet.publicKey}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing Swap...' : 'Swap Tokens'}

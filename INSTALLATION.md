@@ -1,35 +1,5 @@
 # Installation Guide
 
-## ⚠️ Important: Lazorkit SDK Package
-
-The Lazorkit SDK package (`@lazor-kit/react`) may not be publicly available on npm yet. 
-
-### Option 1: Install from GitHub (if available)
-
-If the package is available on GitHub, you can install it directly:
-
-```bash
-npm install git+https://github.com/lazor-kit/lazor-kit.git
-# or
-yarn add git+https://github.com/lazor-kit/lazor-kit.git
-```
-
-### Option 2: Use Local Package
-
-If you have the Lazorkit SDK locally:
-
-```bash
-npm install /path/to/lazor-kit
-# or
-yarn add /path/to/lazor-kit
-```
-
-### Option 3: Manual Integration
-
-1. Download the Lazorkit SDK from [GitHub](https://github.com/lazor-kit/lazor-kit)
-2. Place it in your project's `node_modules` or create a local package
-3. Update imports in your code accordingly
-
 ## 📦 Installing Dependencies
 
 ### Prerequisites
@@ -38,21 +8,17 @@ yarn add /path/to/lazor-kit
 - **npm** or **yarn** package manager
 - **Sufficient disk space** (at least 500MB free)
 
-### Step 1: Check Disk Space
+### Step 1: Install Lazorkit SDK
 
-**Windows:**
-```cmd
-dir E:\
+Install the Lazorkit wallet package:
+
+```bash
+npm install @lazorkit/wallet @solana/web3.js
+# or
+yarn add @lazorkit/wallet @solana/web3.js
 ```
 
-**PowerShell:**
-```powershell
-Get-PSDrive E
-```
-
-If disk is full, free up space before proceeding.
-
-### Step 2: Install Dependencies
+### Step 2: Install Other Dependencies
 
 **Using npm:**
 ```bash
@@ -71,12 +37,17 @@ pnpm install
 
 ### Step 3: Verify Installation
 
-Check that `node_modules` folder was created:
+Check that `node_modules` folder was created and packages are installed:
 
 ```bash
 ls node_modules
 # or on Windows
 dir node_modules
+```
+
+Verify Lazorkit package:
+```bash
+npm list @lazorkit/wallet
 ```
 
 ## 🐛 Troubleshooting
@@ -88,9 +59,12 @@ dir node_modules
 - Clear npm/yarn cache: `npm cache clean --force` or `yarn cache clean`
 - Remove old `node_modules` folders from other projects
 
-### Error: "Cannot find module '@lazor-kit/react'"
+### Error: "Cannot find module '@lazorkit/wallet'"
 
-**Solution:** The Lazorkit SDK package needs to be installed separately. See options above.
+**Solution:** 
+- Ensure you've run `npm install` or `yarn install`
+- Check that the package is in your `package.json`
+- Try clearing node_modules and reinstalling: `rm -rf node_modules && npm install`
 
 ### npm not working
 
@@ -115,7 +89,10 @@ If version is too old, update Node.js from [nodejs.org](https://nodejs.org/)
 Once dependencies are installed:
 
 1. Create `.env.local` file (see ENV_SETUP.md)
-2. Configure network (devnet/mainnet) - no API key needed!
+2. Set up environment variables:
+   - `NEXT_PUBLIC_SOLANA_RPC_URL`
+   - `NEXT_PUBLIC_LAZORKIT_PORTAL_URL`
+   - `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL`
 3. Run `npm run dev` or `yarn dev`
 4. Open http://localhost:3000
 

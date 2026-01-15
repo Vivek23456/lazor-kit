@@ -7,15 +7,14 @@ This guide explains how to set up environment variables for the Lazorkit example
 Create a `.env.local` file in the root directory of the project with the following variables:
 
 ```env
-# Solana Network (Required)
-# Options: 'devnet' or 'mainnet'
-# Use 'devnet' for testing, 'mainnet' for production
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
-
-# Solana RPC URL (Optional)
-# Defaults to public RPC if not provided
-# For better performance, use a custom RPC endpoint
+# Solana RPC URL (Required)
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# Lazorkit Portal URL (Required)
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+
+# Lazorkit Paymaster URL (Required)
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com
 ```
 
 **Note:** Lazorkit does not require an API key. You can start using it immediately without any authentication setup.
@@ -25,8 +24,9 @@ NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 ### Devnet (Recommended for Testing)
 
 ```env
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com
 ```
 
 **Use devnet when:**
@@ -38,8 +38,9 @@ NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 ### Mainnet (Production)
 
 ```env
-NEXT_PUBLIC_SOLANA_NETWORK=mainnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.mainnet.lazorkit.com
 ```
 
 **Use mainnet when:**
@@ -60,6 +61,8 @@ For better performance and reliability, consider using custom RPC providers:
 
 ```env
 NEXT_PUBLIC_SOLANA_RPC_URL=https://your-custom-rpc-endpoint.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com
 ```
 
 ## 📁 File Structure
@@ -87,9 +90,8 @@ After setting up environment variables:
 
 1. Start the dev server: `npm run dev`
 2. Open browser console
-3. Check for any API key errors
-4. Try the passkey login example
-5. Verify network is correct (devnet/mainnet)
+3. Try the passkey login example
+4. Verify wallet connection works
 
 ## 🚀 Production Deployment
 
@@ -104,8 +106,9 @@ When deploying to production:
 
 1. Go to Project Settings → Environment Variables
 2. Add each variable:
-   - `NEXT_PUBLIC_SOLANA_NETWORK`
-   - `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
+   - `NEXT_PUBLIC_SOLANA_RPC_URL`
+   - `NEXT_PUBLIC_LAZORKIT_PORTAL_URL`
+   - `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL`
 3. Redeploy the project
 
 ## 🔍 Verifying Environment Variables
@@ -113,9 +116,9 @@ When deploying to production:
 You can verify your setup by checking the browser console:
 
 ```javascript
-console.log('Network:', process.env.NEXT_PUBLIC_SOLANA_NETWORK)
 console.log('RPC:', process.env.NEXT_PUBLIC_SOLANA_RPC_URL)
-// Note: API key should NOT be logged for security
+console.log('Portal:', process.env.NEXT_PUBLIC_LAZORKIT_PORTAL_URL)
+console.log('Paymaster:', process.env.NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL)
 ```
 
 ## 🐛 Troubleshooting
@@ -126,13 +129,9 @@ console.log('RPC:', process.env.NEXT_PUBLIC_SOLANA_RPC_URL)
 - Ensure `NEXT_PUBLIC_` prefix is present
 - Clear `.next` cache and rebuild
 
-### API key errors?
-- Lazorkit does not require an API key, so you shouldn't see any API key errors
-- If you see errors, check the Lazorkit documentation for the latest setup requirements
-
-### Network errors?
+### Connection errors?
 - Verify RPC URL is accessible
-- Check network name is 'devnet' or 'mainnet'
+- Check portal and paymaster URLs are correct
 - Try public RPC as fallback
 
 ---

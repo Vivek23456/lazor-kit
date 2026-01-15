@@ -36,7 +36,7 @@ export default function Home() {
           >
             <h2 className="text-xl font-semibold mb-2">⚡ Gasless Transaction</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Send USDC on Solana without paying gas fees using smart wallet.
+              Send SOL on Solana without paying gas fees using smart wallet.
             </p>
           </Link>
 

@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useLazorkitContext } from '@/components/LazorkitProvider'
+import { useWallet } from '@/components/LazorkitProvider'
 import Link from 'next/link'
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
 /**
  * Gasless Transaction Example
  * 
  * This example demonstrates how to:
- * 1. Send USDC (or any SPL token) on Solana
- * 2. Execute transaction without paying gas fees
+ * 1. Send SOL on Solana using Lazorkit smart wallet
+ * 2. Execute transaction with gasless/sponsored fees via paymaster
  * 3. Use smart wallet for gasless transactions
  * 
  * Tutorial: See /tutorials/gasless-transactions for step-by-step guide
@@ -21,15 +22,20 @@ export default function GaslessTransactionPage() {
   const [txSignature, setTxSignature] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const lazorkit = useLazorkitContext()
+  const wallet = useWallet()
 
   /**
-   * Execute gasless USDC transfer
+   * Execute gasless SOL transfer
    * 
-   * This function sends USDC tokens without requiring the user
-   * to pay for transaction fees. The smart wallet handles gas payment.
+   * This function sends SOL tokens using the Lazorkit smart wallet.
+   * The paymaster (configured in LazorkitProvider) will sponsor the transaction fees.
    */
   const handleGaslessTransfer = async () => {
+    if (!wallet.publicKey) {
+      setError('Please connect your wallet first')
+      return
+    }
+
     if (!recipientAddress || !amount) {
       setError('Please enter recipient address and amount')
       return
@@ -40,24 +46,35 @@ export default function GaslessTransactionPage() {
     setTxSignature(null)
 
     try {
-      // Step 1: Ensure user is authenticated
-      // const wallet = await lazorkit.getWallet()
-      // if (!wallet) {
-      //   throw new Error('Please authenticate first')
-      // }
-
-      // Step 2: Create gasless transaction
-      // The smart wallet will sponsor the transaction fees
-      // const signature = await lazorkit.sendGaslessTransaction({
-      //   to: recipientAddress,
-      //   amount: parseFloat(amount),
-      //   token: 'USDC', // or 'SOL' for native SOL transfer
-      // })
-
-      // setTxSignature(signature)
+      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+      const connection = new Connection(rpcUrl, 'confirmed')
       
-      console.log('Executing gasless transaction...')
-      setError('Please implement actual Lazorkit SDK gasless transaction call')
+      // Validate recipient address
+      const recipientPubkey = new PublicKey(recipientAddress)
+      const amountLamports = parseFloat(amount) * LAMPORTS_PER_SOL
+
+      // Create transaction
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: recipientPubkey,
+          lamports: amountLamports,
+        })
+      )
+
+      // Get recent blockhash
+      const { blockhash } = await connection.getLatestBlockhash()
+      transaction.recentBlockhash = blockhash
+      transaction.feePayer = wallet.publicKey
+
+      // Sign and send transaction using wallet
+      // The paymaster will sponsor fees automatically
+      const signature = await wallet.sendTransaction(transaction, connection)
+      
+      // Wait for confirmation
+      await connection.confirmTransaction(signature, 'confirmed')
+      
+      setTxSignature(signature)
     } catch (err: any) {
       setError(err.message || 'Failed to execute gasless transaction')
       console.error('Gasless transaction error:', err)
@@ -75,10 +92,18 @@ export default function GaslessTransactionPage() {
 
         <h1 className="text-3xl font-bold mb-4">⚡ Gasless Transaction Example</h1>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Send USDC on Solana without paying gas fees using smart wallet technology.
+          Send SOL on Solana without paying gas fees using Lazorkit smart wallet technology.
         </p>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+          {!wallet.publicKey && (
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+              <p className="text-yellow-800 dark:text-yellow-200">
+                Please connect your wallet first using the passkey login example.
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
               <p className="text-red-800 dark:text-red-200">{error}</p>
@@ -128,7 +153,7 @@ export default function GaslessTransactionPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Amount (USDC)</label>
+                <label className="block text-sm font-medium mb-2">Amount (SOL)</label>
                 <input
                   type="number"
                   value={amount}
@@ -141,7 +166,7 @@ export default function GaslessTransactionPage() {
               </div>
               <button
                 onClick={handleGaslessTransfer}
-                disabled={isLoading || !recipientAddress || !amount}
+                disabled={isLoading || !recipientAddress || !amount || !wallet.publicKey}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing...' : 'Send Gasless Transaction'}
@@ -155,7 +180,7 @@ export default function GaslessTransactionPage() {
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
             <li>User enters recipient address and amount</li>
             <li>Lazorkit smart wallet creates the transaction</li>
-            <li>Smart wallet sponsors the transaction fees (gasless)</li>
+            <li>Paymaster sponsors the transaction fees (gasless)</li>
             <li>Transaction is signed and broadcast to Solana network</li>
             <li>Transaction signature is returned for verification</li>
           </ol>

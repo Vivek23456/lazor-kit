@@ -18,8 +18,9 @@ This guide will help you deploy the Lazorkit example to various platforms.
    - **Framework Preset**: Next.js
    - **Root Directory**: `./` (or leave default)
 5. Add Environment Variables:
-   - `NEXT_PUBLIC_SOLANA_NETWORK` - `devnet` or `mainnet`
-   - `NEXT_PUBLIC_SOLANA_RPC_URL` - Optional custom RPC
+   - `NEXT_PUBLIC_SOLANA_RPC_URL` - Solana RPC endpoint
+   - `NEXT_PUBLIC_LAZORKIT_PORTAL_URL` - Lazorkit Portal URL
+   - `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL` - Lazorkit Paymaster URL
    
    **Note:** Lazorkit does not require an API key - you can deploy without one!
 6. Click "Deploy"
@@ -42,8 +43,9 @@ In Netlify dashboard, configure:
 ### Step 2: Environment Variables
 
 Add the same environment variables as Vercel:
-- `NEXT_PUBLIC_SOLANA_NETWORK`
-- `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
+- `NEXT_PUBLIC_SOLANA_RPC_URL`
+- `NEXT_PUBLIC_LAZORKIT_PORTAL_URL`
+- `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL`
 
 ### Step 3: Deploy
 
@@ -68,8 +70,9 @@ Amplify will auto-detect Next.js. Verify:
 ### Step 3: Environment Variables
 
 Add in Amplify Console → App settings → Environment variables:
-- `NEXT_PUBLIC_SOLANA_NETWORK`
-- `NEXT_PUBLIC_SOLANA_RPC_URL` (optional)
+- `NEXT_PUBLIC_SOLANA_RPC_URL`
+- `NEXT_PUBLIC_LAZORKIT_PORTAL_URL`
+- `NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL`
 
 ## 🐳 Deploy with Docker
 
@@ -123,13 +126,15 @@ const nextConfig: NextConfig = {
 ```bash
 docker build -t lazorkit-example .
 docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_SOLANA_NETWORK=devnet \
+  -e NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com \
+  -e NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh \
+  -e NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com \
   lazorkit-example
 ```
 
 ## 📋 Pre-Deployment Checklist
 
-- [ ] Network is set correctly (devnet/mainnet)
+- [ ] Environment variables are set correctly
 - [ ] HTTPS is enabled (required for passkey)
 - [ ] All examples are tested locally
 - [ ] Error handling is in place
@@ -147,14 +152,16 @@ docker run -p 3000:3000 \
 
 ### Devnet (Testing)
 ```env
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.devnet.lazorkit.com
 ```
 
 ### Mainnet (Production)
 ```env
-NEXT_PUBLIC_SOLANA_NETWORK=mainnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+NEXT_PUBLIC_LAZORKIT_PORTAL_URL=https://portal.lazor.sh
+NEXT_PUBLIC_LAZORKIT_PAYMASTER_URL=https://kora.mainnet.lazorkit.com
 ```
 
 ## 🐛 Troubleshooting Deployment
