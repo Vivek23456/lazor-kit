@@ -70,7 +70,7 @@ const solTransaction = {
 
         <section>
           <h2>Step 3: Execute Gasless Transaction</h2>
-          <p>Send the transaction using Lazorkit's gasless method:</p>
+          <p>Send the transaction using Lazorkit&apos;s gasless method:</p>
           <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-x-auto">
 {`async function sendGaslessTransaction(recipient, amount, token = 'USDC') {
   try {
@@ -122,7 +122,7 @@ const solTransaction = {
 
         <section>
           <h2>Step 5: Complete Example</h2>
-          <p>Here's a complete React component example:</p>
+          <p>Here&apos;s a complete React component example:</p>
           <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-x-auto">
 {`'use client'
 

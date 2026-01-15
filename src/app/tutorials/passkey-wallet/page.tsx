@@ -142,7 +142,7 @@ const publicKey = wallet.publicKey`}
         <section>
           <h2>How It Works</h2>
           <ol>
-            <li><strong>User clicks "Login with Passkey"</strong> - Triggers WebAuthn API</li>
+            <li><strong>User clicks &quot;Login with Passkey&quot;</strong> - Triggers WebAuthn API</li>
             <li><strong>Browser prompts for authentication</strong> - Biometrics, PIN, or security key</li>
             <li><strong>Lazorkit creates/authenticates smart wallet</strong> - No seed phrase needed</li>
             <li><strong>Wallet address is returned</strong> - Ready to use for transactions</li>

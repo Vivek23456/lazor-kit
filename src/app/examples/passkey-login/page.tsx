@@ -147,7 +147,7 @@ export default function PasskeyLoginPage() {
         <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <h3 className="font-semibold mb-2">💡 How it works:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
-            <li>User clicks "Authenticate with Passkey"</li>
+            <li>User clicks &quot;Authenticate with Passkey&quot;</li>
             <li>Browser prompts for biometric/PIN authentication</li>
             <li>Lazorkit creates/authenticates smart wallet</li>
             <li>Wallet address is returned and displayed</li>
