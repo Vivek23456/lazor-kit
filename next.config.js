@@ -10,11 +10,17 @@ const nextConfig = {
       net: false,
       tls: false,
     }
+    
     // Add alias to map @lazor-kit/react to the installed monorepo package
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@lazor-kit/react': '@lazorkit/monorepo',
+    // Try different possible export paths from the monorepo
+    if (!config.resolve.alias) {
+      config.resolve.alias = {}
     }
+    
+    // Map @lazor-kit/react to the monorepo package
+    // The monorepo might export at root or at /react subpath
+    config.resolve.alias['@lazor-kit/react'] = '@lazorkit/monorepo'
+    
     return config
   },
 }

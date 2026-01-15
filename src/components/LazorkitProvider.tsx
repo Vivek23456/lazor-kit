@@ -1,7 +1,10 @@
 'use client'
 
 import { createContext, useContext, ReactNode } from 'react'
-import { useLazorkit } from '@lazor-kit/react'
+// Import from the installed monorepo package
+// The webpack alias in next.config.js maps @lazor-kit/react to @lazorkit/monorepo
+// Try importing directly from the monorepo as fallback
+import { useLazorkit } from '@lazorkit/monorepo'
 
 /**
  * Lazorkit Context
