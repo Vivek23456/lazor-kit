@@ -23,7 +23,7 @@ This project provides practical, production-ready examples of:
 1. **Clone or download this repository**
 
 ```bash
-cd lazorkit-example
+cd lazor-kit
 ```
 
 2. **Install dependencies**
