@@ -157,6 +157,11 @@ This tutorial explains:
 npm install @lazorkit/wallet @solana/web3.js
 ```
 
+**Note:** If `@lazorkit/wallet` is not available on npm, install from GitHub:
+```bash
+npm install git+https://github.com/lazor-kit/lazor-kit.git @solana/web3.js
+```
+
 For more installation options, see [INSTALLATION.md](./INSTALLATION.md).
 
 ### Configure Lazorkit Provider

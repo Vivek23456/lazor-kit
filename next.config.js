@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Transpile Lazorkit wallet package if needed
-  transpilePackages: ['@lazorkit/wallet'],
+  // Transpile the Lazorkit monorepo package
+  transpilePackages: ['@lazorkit/monorepo'],
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,

@@ -1,6 +1,6 @@
 'use client'
 
-import { LazorkitProvider as LazorkitProviderSDK } from '@lazorkit/wallet'
+import { LazorkitProvider as LazorkitProviderSDK, useWallet } from '@lazorkit/monorepo/react'
 import { ReactNode } from 'react'
 
 /**
@@ -28,4 +28,4 @@ export function LazorkitProvider({ children }: { children: ReactNode }) {
 }
 
 // Export useWallet hook for components
-export { useWallet } from '@lazorkit/wallet'
+export { useWallet }

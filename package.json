@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lazorkit/wallet": "git+https://github.com/lazor-kit/lazor-kit.git",
+    "@lazorkit/monorepo": "git+https://github.com/lazor-kit/lazor-kit.git",
     "@solana/web3.js": "^1.87.6",
     "next": "^14.2.0",
     "react": "^18.3.1",
