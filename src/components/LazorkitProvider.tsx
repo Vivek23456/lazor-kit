@@ -27,6 +27,16 @@ export function LazorkitProvider({ children }: { children: React.ReactNode }) {
 
 export function useWallet() {
   const lazor = useContext(LazorkitContext);
+  
+  // Return a safe default during SSR
+  if (typeof window === 'undefined') {
+    return {
+      connect: async () => {},
+      publicKey: null,
+      sendTransaction: async () => {},
+    };
+  }
+  
   if (!lazor) throw new Error("Lazorkit not ready");
 
   return {

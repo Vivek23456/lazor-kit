@@ -12,13 +12,18 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.0",
     "@lazorkit/monorepo": "git+https://github.com/lazor-kit/lazor-kit.git",
+    "@solana-program/token": "^0.9.0",
+    "@solana/kit": "^5.0.0",
+    "@solana/kora": "0.2.0-beta.2",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/web3.js": "^1.87.6",
     "@wallet-standard/wallet": "^1.0.1",
+    "bs58": "^6.0.0",
     "js-sha256": "^0.11.0",
     "next": "^14.2.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
