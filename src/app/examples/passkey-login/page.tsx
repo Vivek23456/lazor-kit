@@ -43,18 +43,54 @@ export default function PasskeyLoginPage() {
       // or
       // const wallet = await lazorkit.authenticateWithPasskey()
       
-      // For now, this is a placeholder structure
-      // Replace with actual Lazorkit SDK calls based on documentation
       console.log('Initiating passkey authentication...')
       
-      // Simulated response (replace with actual SDK call)
-      // const result = await lazorkit.authenticate()
-      // setWalletAddress(result.walletAddress)
-      // setBalance(result.balance)
+      // Try to use the Lazorkit SDK methods
+      if (lazorkit.createWalletWithPasskey) {
+        try {
+          const wallet = await lazorkit.createWalletWithPasskey({
+            name: 'My Solana Wallet',
+          })
+          if (wallet && wallet.address) {
+            setWalletAddress(wallet.address)
+            // Fetch balance after wallet creation
+            if (lazorkit.getBalance) {
+              const bal = await lazorkit.getBalance(wallet.address)
+              setBalance(bal.toString())
+            }
+            return
+          }
+        } catch (createError) {
+          // If creation fails, try authentication
+          if (lazorkit.authenticateWithPasskey) {
+            const wallet = await lazorkit.authenticateWithPasskey()
+            if (wallet && wallet.address) {
+              setWalletAddress(wallet.address)
+              if (lazorkit.getBalance) {
+                const bal = await lazorkit.getBalance(wallet.address)
+                setBalance(bal.toString())
+              }
+              return
+            }
+          }
+        }
+      }
       
-      setError('Please implement actual Lazorkit SDK authentication call')
+      // If SDK is not installed, show informative message
+      setError(
+        'Lazorkit SDK is not installed. This is a template/demo implementation. ' +
+        'To use actual passkey authentication, install @lazor-kit/react and update LazorkitProvider.tsx'
+      )
     } catch (err: any) {
-      setError(err.message || 'Failed to authenticate with passkey')
+      // Check if it's the stub error
+      if (err.message && err.message.includes('Lazorkit SDK not installed')) {
+        setError(
+          'Lazorkit SDK is not installed. This is a template/demo implementation. ' +
+          'To use actual passkey authentication, install @lazor-kit/react and update LazorkitProvider.tsx'
+        )
+      } else {
+        setError(err.message || 'Failed to authenticate with passkey')
+      }
       console.error('Passkey auth error:', err)
     } finally {
       setIsLoading(false)
@@ -98,8 +134,27 @@ export default function PasskeyLoginPage() {
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
-              <p className="text-red-800 dark:text-red-200">{error}</p>
+            <div className={`mb-4 p-4 rounded border ${
+              error.includes('Lazorkit SDK is not installed') 
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' 
+                : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+            }`}>
+              <p className={error.includes('Lazorkit SDK is not installed') 
+                ? 'text-yellow-800 dark:text-yellow-200' 
+                : 'text-red-800 dark:text-red-200'
+              }>
+                {error}
+              </p>
+              {error.includes('Lazorkit SDK is not installed') && (
+                <div className="mt-3 text-sm">
+                  <p className="font-semibold mb-2">To enable actual passkey authentication:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-yellow-700 dark:text-yellow-300">
+                    <li>Install the Lazorkit SDK: <code className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">npm install @lazor-kit/react</code></li>
+                    <li>Update <code className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">src/components/LazorkitProvider.tsx</code> with the actual SDK import</li>
+                    <li>See the <Link href="/tutorials/passkey-wallet" className="underline">tutorial</Link> for detailed instructions</li>
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 
