@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/components/LazorkitProvider'
+import { useWallet } from '@lazorkit/monorepo/packages/ts-sdk'
 import Link from 'next/link'
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { Connection, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
 /**
  * Gasless Transaction Example
@@ -22,7 +22,7 @@ export default function GaslessTransactionPage() {
   const [txSignature, setTxSignature] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const wallet = useWallet()
+  const { smartWalletPubkey, isConnected, signAndSendTransaction } = useWallet()
 
   /**
    * Execute gasless SOL transfer
@@ -31,7 +31,7 @@ export default function GaslessTransactionPage() {
    * The paymaster (configured in LazorkitProvider) will sponsor the transaction fees.
    */
   const handleGaslessTransfer = async () => {
-    if (!wallet.publicKey) {
+    if (!smartWalletPubkey) {
       setError('Please connect your wallet first')
       return
     }
@@ -46,33 +46,22 @@ export default function GaslessTransactionPage() {
     setTxSignature(null)
 
     try {
-      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
-      const connection = new Connection(rpcUrl, 'confirmed')
-      
       // Validate recipient address
       const recipientPubkey = new PublicKey(recipientAddress)
       const amountLamports = parseFloat(amount) * LAMPORTS_PER_SOL
 
-      // Create transaction
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: wallet.publicKey,
-          toPubkey: recipientPubkey,
-          lamports: amountLamports,
-        })
-      )
+      // Create transfer instruction
+      const transferInstruction = SystemProgram.transfer({
+        fromPubkey: smartWalletPubkey,
+        toPubkey: recipientPubkey,
+        lamports: amountLamports,
+      })
 
-      // Get recent blockhash
-      const { blockhash } = await connection.getLatestBlockhash()
-      transaction.recentBlockhash = blockhash
-      transaction.feePayer = wallet.publicKey
-
-      // Sign and send transaction using wallet
+      // Sign and send transaction using Lazorkit SDK
       // The paymaster will sponsor fees automatically
-      const signature = await wallet.sendTransaction(transaction, connection)
-      
-      // Wait for confirmation
-      await connection.confirmTransaction(signature, 'confirmed')
+      const signature = await signAndSendTransaction({
+        instructions: [transferInstruction],
+      })
       
       setTxSignature(signature)
     } catch (err: any) {
@@ -96,10 +85,10 @@ export default function GaslessTransactionPage() {
         </p>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
-          {!wallet.publicKey && (
+          {!isConnected && (
             <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
               <p className="text-yellow-800 dark:text-yellow-200">
-                Please connect your wallet first using the passkey login example.
+                Please connect your wallet first using the <Link href="/examples/passkey-login" className="underline">passkey login example</Link>.
               </p>
             </div>
           )}
@@ -166,7 +155,7 @@ export default function GaslessTransactionPage() {
               </div>
               <button
                 onClick={handleGaslessTransfer}
-                disabled={isLoading || !recipientAddress || !amount || !wallet.publicKey}
+                disabled={isLoading || !recipientAddress || !amount || !isConnected}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing...' : 'Send Gasless Transaction'}

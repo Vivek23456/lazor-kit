@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { LazorkitProvider } from '@/components/LazorkitProvider'
+import { LazorkitWrapper } from '@/components/LazorkitWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <LazorkitProvider>
+        <LazorkitWrapper>
           {children}
-        </LazorkitProvider>
+        </LazorkitWrapper>
       </body>
     </html>
   )
