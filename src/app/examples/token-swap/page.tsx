@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/components/LazorkitProvider'
+import { useWallet } from '@lazorkit/monorepo/packages/ts-sdk'
 import Link from 'next/link'
 
 /**
@@ -23,10 +23,10 @@ export default function TokenSwapPage() {
   const [txSignature, setTxSignature] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const wallet = useWallet()
+  const { smartWalletPubkey, isConnected, signAndSendTransaction } = useWallet()
 
   const handleSwap = async () => {
-    if (!wallet.publicKey) {
+    if (!isConnected) {
       setError('Please connect your wallet first')
       return
     }
@@ -49,8 +49,10 @@ export default function TokenSwapPage() {
       // })
 
       // Step 2: Execute swap using Lazorkit smart wallet
-      // const swapTransaction = await buildJupiterSwapTransaction(quote, wallet.publicKey)
-      // const signature = await wallet.sendTransaction(swapTransaction, connection)
+      // const swapTransaction = await buildJupiterSwapTransaction(quote, smartWalletPubkey)
+      // const signature = await signAndSendTransaction({
+      //   instructions: swapTransaction.instructions,
+      // })
       
       console.log('Executing token swap...')
       setError('Token swap integration requires Jupiter API. See tutorial for implementation details.')
@@ -75,10 +77,10 @@ export default function TokenSwapPage() {
         </p>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
-          {!wallet.publicKey && (
+          {!isConnected && (
             <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
               <p className="text-yellow-800 dark:text-yellow-200">
-                Please connect your wallet first using the passkey login example.
+                Please connect your wallet first using the <Link href="/examples/passkey-login" className="underline">passkey login example</Link>.
               </p>
             </div>
           )}
@@ -160,7 +162,7 @@ export default function TokenSwapPage() {
               </div>
               <button
                 onClick={handleSwap}
-                disabled={isLoading || !amount || !wallet.publicKey}
+                disabled={isLoading || !amount || !isConnected}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing Swap...' : 'Swap Tokens'}

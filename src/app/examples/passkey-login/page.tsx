@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useWallet } from '@/components/LazorkitProvider'
+import { useState, useEffect } from 'react'
+import { useWallet } from '@lazorkit/monorepo/packages/ts-sdk'
 import Link from 'next/link'
 import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
@@ -21,12 +21,12 @@ export default function PasskeyLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const wallet = useWallet()
+  const { smartWalletPubkey, isConnected, isConnecting, connect } = useWallet()
 
   /**
    * Step 1: Connect wallet with passkey
    * 
-   * This function calls wallet.connect() which:
+   * This function calls connect() which:
    * - Opens Lazor Portal
    * - Triggers WebAuthn (biometrics/PIN)
    * - Creates MPC smart wallet
@@ -38,19 +38,8 @@ export default function PasskeyLoginPage() {
 
     try {
       console.log('Starting passkey authentication...')
-      await wallet.connect() // Opens Lazor Portal + WebAuthn
+      await connect() // Opens Lazor Portal + WebAuthn
       console.log('Authentication completed!')
-      console.log('Wallet object:', wallet)
-      console.log('Public key:', wallet.publicKey)
-      console.log('Public key base58:', wallet.publicKey?.toBase58())
-      
-      // Fetch balance after connection
-      if (wallet.publicKey) {
-        setWalletAddress(wallet.publicKey.toBase58())
-        await fetchBalance()
-      } else {
-        console.warn('No public key found after authentication')
-      }
     } catch (err: any) {
       console.error('Full error:', err)
       
@@ -67,20 +56,29 @@ export default function PasskeyLoginPage() {
   }
 
   /**
+   * Fetch balance when connected
+   */
+  useEffect(() => {
+    if (smartWalletPubkey) {
+      fetchBalance()
+    }
+  }, [smartWalletPubkey])
+
+  /**
    * Step 2: Fetch wallet balance
    * 
    * After successful authentication, fetch the current SOL balance
    * using Solana Web3.js
    */
   const fetchBalance = async () => {
-    if (!wallet.publicKey) return
+    if (!smartWalletPubkey) return
 
     setIsLoading(true)
     try {
       const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
       const connection = new Connection(rpcUrl, 'confirmed')
-      const balance = await connection.getBalance(wallet.publicKey)
-      setBalance((balance / LAMPORTS_PER_SOL).toFixed(4))
+      const balanceValue = await connection.getBalance(smartWalletPubkey)
+      setBalance((balanceValue / LAMPORTS_PER_SOL).toFixed(4))
     } catch (err: any) {
       setError(err.message || 'Failed to fetch balance')
     } finally {
@@ -107,7 +105,7 @@ export default function PasskeyLoginPage() {
             </div>
           )}
 
-          {!wallet.publicKey ? (
+          {!isConnected ? (
             <div>
               <h2 className="text-xl font-semibold mb-4">Step 1: Authenticate with Passkey</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -116,10 +114,10 @@ export default function PasskeyLoginPage() {
               </p>
               <button
                 onClick={handleLogin}
-                disabled={isLoading}
+                disabled={isLoading || isConnecting}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Authenticating...' : 'Login with Passkey'}
+                {isLoading || isConnecting ? 'Authenticating...' : 'Login with Passkey'}
               </button>
             </div>
           ) : (
@@ -129,7 +127,7 @@ export default function PasskeyLoginPage() {
                 <div>
                   <label className="block text-sm font-medium mb-1">Wallet Address</label>
                   <p className="font-mono text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded break-all">
-                    {wallet.publicKey.toBase58()}
+                    {smartWalletPubkey?.toBase58()}
                   </p>
                 </div>
                 <div>
