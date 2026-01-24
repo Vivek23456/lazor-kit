@@ -46,7 +46,6 @@ export default function PasskeyLoginPage() {
       
       // Fetch balance after connection
       if (wallet.publicKey) {
-        setWalletAddress(wallet.publicKey.toBase58())
         await fetchBalance()
       } else {
         console.warn('No public key found after authentication')
