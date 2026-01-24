@@ -23,36 +23,51 @@ export default function GaslessTransactionPage() {
   const [error, setError] = useState<string | null>(null)
   const [balance, setBalance] = useState<number | null>(null)
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
+  const [isAccountInitialized, setIsAccountInitialized] = useState<boolean | null>(null)
   
   const { smartWalletPubkey, isConnected, signAndSendTransaction } = useWallet()
 
   /**
-   * Fetch wallet balance when connected
+   * Fetch wallet balance and check account initialization when connected
    */
   useEffect(() => {
     if (smartWalletPubkey && isConnected) {
-      fetchBalance()
+      fetchAccountInfo()
     }
   }, [smartWalletPubkey, isConnected])
 
-  const fetchBalance = async () => {
+  const fetchAccountInfo = async () => {
     if (!smartWalletPubkey) return
 
     setIsLoadingBalance(true)
     try {
       const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
       const connection = new Connection(rpcUrl, 'confirmed')
-      const balanceValue = await connection.getBalance(smartWalletPubkey)
-      setBalance(balanceValue / LAMPORTS_PER_SOL)
+      
+      // Get full account info to check if it's initialized
+      const accountInfo = await connection.getAccountInfo(smartWalletPubkey)
+      
+      if (accountInfo) {
+        setBalance(accountInfo.lamports / LAMPORTS_PER_SOL)
+        // Account exists and has data if it's owned by a program (not system program with no data)
+        // A properly initialized smart wallet will have data from the Lazorkit program
+        setIsAccountInitialized(accountInfo.data.length > 0)
+      } else {
+        // Account doesn't exist at all
+        setBalance(0)
+        setIsAccountInitialized(false)
+      }
     } catch (err: any) {
-      console.error('Failed to fetch balance:', err)
+      console.error('Failed to fetch account info:', err)
       setBalance(0)
+      setIsAccountInitialized(false)
     } finally {
       setIsLoadingBalance(false)
     }
   }
 
   const hasInsufficientBalance = balance !== null && balance === 0
+  const isWalletNotInitialized = isAccountInitialized === false && balance !== null && balance > 0
 
   /**
    * Execute gasless SOL transfer
@@ -156,15 +171,49 @@ export default function GaslessTransactionPage() {
 
           {isConnected && balance !== null && balance > 0 && (
             <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
-              <p className="text-green-800 dark:text-green-200">
-                Wallet Balance: <span className="font-bold">{balance.toFixed(4)} SOL</span>
+              <div className="flex justify-between items-center">
+                <p className="text-green-800 dark:text-green-200">
+                  Wallet Balance: <span className="font-bold">{balance.toFixed(4)} SOL</span>
+                </p>
+                <button
+                  onClick={fetchAccountInfo}
+                  disabled={isLoadingBalance}
+                  className="text-sm text-green-600 hover:text-green-800 underline"
+                >
+                  {isLoadingBalance ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isConnected && isWalletNotInitialized && (
+            <div className="mb-4 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded">
+              <p className="text-orange-800 dark:text-orange-200 font-semibold mb-2">
+                Smart Wallet Not Initialized
+              </p>
+              <p className="text-orange-700 dark:text-orange-300 text-sm mb-3">
+                Your wallet address has SOL, but the smart wallet account hasn&apos;t been initialized by the Lazorkit program yet.
+                This usually happens when SOL is airdropped directly to the smart wallet address instead of going through the proper initialization flow.
+              </p>
+              <p className="text-orange-700 dark:text-orange-300 text-sm mb-3">
+                <strong>To fix this:</strong> Try logging out and creating a new passkey wallet. The Lazorkit SDK should automatically initialize the smart wallet account during the login process.
+              </p>
+              <p className="text-orange-700 dark:text-orange-300 text-sm">
+                <strong>Note:</strong> If you need to recover the SOL from this address, you&apos;ll need to use the recovery process or contact Lazorkit support.
               </p>
             </div>
           )}
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
-              <p className="text-red-800 dark:text-red-200">{error}</p>
+              <p className="text-red-800 dark:text-red-200 font-semibold mb-2">{error}</p>
+              {error.includes('Account does not exist') && (
+                <p className="text-red-700 dark:text-red-300 text-sm">
+                  This error means the smart wallet account is not properly initialized on Solana.
+                  The Lazorkit program needs to create the smart wallet account before transactions can be sent.
+                  Try going back to the <Link href="/examples/passkey-login" className="underline">passkey login page</Link> and re-authenticating.
+                </p>
+              )}
             </div>
           )}
 
