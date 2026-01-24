@@ -1,3 +1,5 @@
+dont use the netlify link
+
 # Lazorkit Integration Example
 
 A comprehensive example repository demonstrating how to integrate [Lazorkit SDK](https://docs.lazorkit.com/) with Next.js for Solana passkey authentication and gasless transactions.
