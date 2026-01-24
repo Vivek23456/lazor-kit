@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useWallet } from '@lazorkit/monorepo/packages/ts-sdk'
 import Link from 'next/link'
 import { Connection, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
@@ -21,8 +21,38 @@ export default function GaslessTransactionPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [balance, setBalance] = useState<number | null>(null)
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false)
   
   const { smartWalletPubkey, isConnected, signAndSendTransaction } = useWallet()
+
+  /**
+   * Fetch wallet balance when connected
+   */
+  useEffect(() => {
+    if (smartWalletPubkey && isConnected) {
+      fetchBalance()
+    }
+  }, [smartWalletPubkey, isConnected])
+
+  const fetchBalance = async () => {
+    if (!smartWalletPubkey) return
+
+    setIsLoadingBalance(true)
+    try {
+      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+      const connection = new Connection(rpcUrl, 'confirmed')
+      const balanceValue = await connection.getBalance(smartWalletPubkey)
+      setBalance(balanceValue / LAMPORTS_PER_SOL)
+    } catch (err: any) {
+      console.error('Failed to fetch balance:', err)
+      setBalance(0)
+    } finally {
+      setIsLoadingBalance(false)
+    }
+  }
+
+  const hasInsufficientBalance = balance !== null && balance === 0
 
   /**
    * Execute gasless SOL transfer
@@ -89,6 +119,45 @@ export default function GaslessTransactionPage() {
             <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
               <p className="text-yellow-800 dark:text-yellow-200">
                 Please connect your wallet first using the <Link href="/examples/passkey-login" className="underline">passkey login example</Link>.
+              </p>
+            </div>
+          )}
+
+          {isConnected && hasInsufficientBalance && (
+            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+              <p className="text-red-800 dark:text-red-200 font-semibold mb-2">
+                Account does not exist or has no data
+              </p>
+              <p className="text-red-700 dark:text-red-300 text-sm mb-2">
+                {smartWalletPubkey?.toBase58()}
+              </p>
+              <p className="text-red-700 dark:text-red-300 text-sm mb-3">
+                Your smart wallet needs SOL to send transactions. Since you&apos;re on devnet, you can get free test SOL from a faucet.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`https://faucet.solana.com/?address=${smartWalletPubkey?.toBase58()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+                >
+                  Get Devnet SOL (Solana Faucet)
+                </a>
+                <button
+                  onClick={fetchBalance}
+                  disabled={isLoadingBalance}
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+                >
+                  {isLoadingBalance ? 'Checking...' : 'Refresh Balance'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isConnected && balance !== null && balance > 0 && (
+            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
+              <p className="text-green-800 dark:text-green-200">
+                Wallet Balance: <span className="font-bold">{balance.toFixed(4)} SOL</span>
               </p>
             </div>
           )}
