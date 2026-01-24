@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useWallet } from '@lazorkit/monorepo/packages/ts-sdk'
 import Link from 'next/link'
-import { Connection, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
 /**
  * Gasless Transaction Example
@@ -25,7 +25,8 @@ export default function GaslessTransactionPage() {
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
   const [isAccountInitialized, setIsAccountInitialized] = useState<boolean | null>(null)
   
-  const { smartWalletPubkey, isConnected, signAndSendTransaction } = useWallet()
+  const wallet = useWallet()
+  const { smartWalletPubkey, isConnected, signAndSendTransaction } = wallet
 
   /**
    * Fetch wallet balance and check account initialization when connected
@@ -93,22 +94,49 @@ export default function GaslessTransactionPage() {
     try {
       // Validate recipient address
       const recipientPubkey = new PublicKey(recipientAddress)
-      const amountLamports = parseFloat(amount) * LAMPORTS_PER_SOL
+      const amountLamports = Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL)
 
-      // Create transfer instruction
-      const transferInstruction = SystemProgram.transfer({
-        fromPubkey: smartWalletPubkey,
-        toPubkey: recipientPubkey,
-        lamports: amountLamports,
-      })
+      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.devnet.solana.com'
+      const connection = new Connection(rpcUrl, 'confirmed')
 
-      // Sign and send transaction using Lazorkit SDK
-      // The paymaster will sponsor fees automatically
-      const signature = await signAndSendTransaction({
-        instructions: [transferInstruction],
-      })
-      
-      setTxSignature(signature)
+      // Try using sendTransaction method if available (as shown in tutorial)
+      // This may handle transaction construction differently
+      if (typeof wallet.sendTransaction === 'function') {
+        console.log('Using sendTransaction method...')
+        
+        // Create a full transaction object
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: smartWalletPubkey,
+            toPubkey: recipientPubkey,
+            lamports: amountLamports,
+          })
+        )
+
+        // Get recent blockhash
+        const { blockhash } = await connection.getLatestBlockhash()
+        transaction.recentBlockhash = blockhash
+        transaction.feePayer = smartWalletPubkey
+
+        // Send transaction using wallet's sendTransaction
+        const signature = await wallet.sendTransaction(transaction, connection)
+        setTxSignature(signature)
+      } else {
+        console.log('Using signAndSendTransaction method...')
+        
+        // Fallback to signAndSendTransaction with instructions
+        const transferInstruction = SystemProgram.transfer({
+          fromPubkey: smartWalletPubkey,
+          toPubkey: recipientPubkey,
+          lamports: amountLamports,
+        })
+
+        const signature = await signAndSendTransaction({
+          instructions: [transferInstruction],
+        })
+        
+        setTxSignature(signature)
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to execute gasless transaction')
       console.error('Gasless transaction error:', err)
@@ -159,7 +187,7 @@ export default function GaslessTransactionPage() {
                   Get Devnet SOL (Solana Faucet)
                 </a>
                 <button
-                  onClick={fetchBalance}
+                  onClick={fetchAccountInfo}
                   disabled={isLoadingBalance}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
                 >
@@ -213,6 +241,21 @@ export default function GaslessTransactionPage() {
                   The Lazorkit program needs to create the smart wallet account before transactions can be sent.
                   Try going back to the <Link href="/examples/passkey-login" className="underline">passkey login page</Link> and re-authenticating.
                 </p>
+              )}
+              {error.includes('too large') && (
+                <div className="text-red-700 dark:text-red-300 text-sm space-y-2">
+                  <p>
+                    Solana transactions have a maximum size of 1232 bytes. Smart wallet transactions 
+                    include additional instructions for the paymaster and wallet program, which can 
+                    exceed this limit.
+                  </p>
+                  <p><strong>Possible solutions:</strong></p>
+                  <ul className="list-disc list-inside ml-2">
+                    <li>Try sending a smaller amount</li>
+                    <li>The Lazorkit SDK may need to use versioned transactions with Address Lookup Tables</li>
+                    <li>Contact Lazorkit support if this persists</li>
+                  </ul>
+                </div>
               )}
             </div>
           )}
